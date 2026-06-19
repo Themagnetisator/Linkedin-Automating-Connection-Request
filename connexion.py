@@ -87,70 +87,61 @@ signal.signal(signal.SIGINT, handle_interrupt)
 def connecter_linkedin(page):
     print("Ouverture de LinkedIn...")
     page.goto("https://www.linkedin.com/login", wait_until="domcontentloaded")
-    time.sleep(4)
+    time.sleep(3)
 
-    # Fill in email
-    champ_email = None
-    for inp in page.locator("input").all():
-        try:
-            if inp.is_visible():
-                champ_email = inp
-                break
-        except:
-            continue
+    # ── Detect if already logged in via persistent session ─────────────────
+    # When a saved session exists, LinkedIn redirects away from /login
+    # to the feed, jobs, or network page. In that case, no login is needed.
+    urls_post_connexion = ["/feed", "/mynetwork", "/jobs", "/notifications", "/messaging"]
+    if any(segment in page.url for segment in urls_post_connexion):
+        print("[OK] Session persistante détectée — déjà connecté.")
+        return True
 
-    if champ_email is None:
-        print("[ERREUR] Champ email introuvable.")
+    # ── Fill in email ───────────────────────────────────────────────────────
+    print("Attente du champ email...")
+    try:
+        page.wait_for_selector("input#username", state="visible", timeout=10000)
+    except:
+        print("[ERREUR] Champ email introuvable après 10 secondes.")
         return False
 
-    champ_email.click()
-    time.sleep(0.5)
-    champ_email.type(EMAIL, delay=80)
-    time.sleep(2)
-
-    # Fill in password
-    champ_mdp = None
-    for inp in page.locator("input").all():
-        try:
-            if inp.is_visible() and inp.get_attribute("type") == "password":
-                champ_mdp = inp
-                break
-        except:
-            continue
-
-    if champ_mdp is None:
-        print("[ERREUR] Champ mot de passe introuvable.")
-        return False
-
-    champ_mdp.click()
-    time.sleep(0.5)
-    champ_mdp.type(MOT_DE_PASSE, delay=80)
+    page.fill("input#username", EMAIL)
+    print("Email rempli.")
     time.sleep(1)
 
-    # Click sign-in button
-    bouton_clique = False
-    for btn in page.locator("button").all():
-        try:
-            if btn.is_visible():
-                texte = btn.inner_text().strip()
-                mots_exclus = ["apple", "google"]
-                if any(m in texte.lower() for m in mots_exclus):
-                    continue
-                mots_cibles = ["s'identifier", "sign in", "se connecter", "login"]
-                if any(m in texte.lower() for m in mots_cibles):
-                    btn.click()
-                    bouton_clique = True
-                    break
-        except:
-            continue
+    # ── Fill in password ────────────────────────────────────────────────────
+    print("Attente du champ mot de passe...")
+    try:
+        page.wait_for_selector("input#password", state="visible", timeout=10000)
+    except:
+        print("[ERREUR] Champ mot de passe introuvable après 10 secondes.")
+        return False
 
-    if not bouton_clique:
-        champ_mdp.press("Enter")
+    page.fill("input#password", MOT_DE_PASSE)
+    print("Mot de passe rempli.")
+    time.sleep(1)
 
-    time.sleep(5)
-    print("[OK] Connexion effectuée.")
-    return True
+    # ── Click Sign In ───────────────────────────────────────────────────────
+    print("Clic sur le bouton S'identifier...")
+    try:
+        page.wait_for_selector("button[type='submit']", state="visible", timeout=10000)
+        page.click("button[type='submit']")
+    except:
+        print("[ERREUR] Bouton de connexion introuvable.")
+        return False
 
+    # ── Wait for successful redirect ────────────────────────────────────────
+    print("Attente de la confirmation de connexion...")
+    try:
+        page.wait_for_url("**linkedin.com/feed**", timeout=20000)
+        print("[OK] Connexion réussie.")
+        return True
+    except:
+        current_url = page.url
+        print(f"[ATTENTION] URL inattendue : {current_url}")
+        print("Une vérification manuelle est peut-être requise dans le navigateur.")
+        input("Complétez la vérification puis appuyez sur ENTRÉE pour continuer...")
+        return True
 # ─────────────────────────────────────────────
 # SEARCH + FILTER
 # ─────────────────────────────────────────────

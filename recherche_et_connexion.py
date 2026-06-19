@@ -2,7 +2,7 @@ import time
 import random
 
 # ============================================================
-# CONFIGURATION
+# CONFIGURATION — Edit these values to suit your needs
 # ============================================================
 
 MOTS_CLES = [
@@ -11,14 +11,34 @@ MOTS_CLES = [
     "Responsable marketing",
 ]
 
-NOTE_CONNEXION = """Bonjour, peut-être que vous pouvez m’aider ?
+NOTE_CONNEXION = """Bonjour, peut-être que vous pouvez m'aider ?
 Mon équipe représente la France
-dans la plus grande compétition d’ingénierie… de l’histoire !!
+dans la plus grande compétition d'ingénierie… de l'histoire !!
 
-Pouvons-nous voir si notre projet éco et éducatif s’aligne avec vos objectifs ?
+Pouvons-nous voir si notre projet éco et éducatif s'aligne avec vos objectifs ?
 
 """
 
+# Nombre maximum d'invitations envoyées par session
+LIMITE_CONNEXIONS_PAR_SESSION = 40
+
+# Délai entre deux invitations consécutives (secondes)
+PAUSE_MIN_ENTRE_CONNEXIONS = 8
+PAUSE_MAX_ENTRE_CONNEXIONS = 18
+
+# Pause longue périodique pour imiter un comportement humain
+# Une pause longue est déclenchée tous les N envois
+PAUSE_LONGUE_TOUS_LES_N     = 10
+PAUSE_LONGUE_DUREE_MIN      = 45
+PAUSE_LONGUE_DUREE_MAX      = 90
+
+# Délai entre deux pages de résultats (secondes)
+PAUSE_MIN_ENTRE_PAGES       = 4
+PAUSE_MAX_ENTRE_PAGES       = 9
+
+# Délai entre deux mots-clés (secondes)
+PAUSE_MIN_ENTRE_MOTS_CLES   = 10
+PAUSE_MAX_ENTRE_MOTS_CLES   = 20
 
 # ============================================================
 
